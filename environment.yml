@@ -1,0 +1,23 @@
+name: robust_eeg
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - jupyterlab
+  - mne
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pip:
+      - adversarial-robustness-toolbox
+      - shap
+      - captum
+
