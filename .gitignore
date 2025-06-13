@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints/
+
+# Data
+data/raw/
+data/processed/
+
+# Logs and outputs
+*.log
+*.out
+*.pth
+*.pt
+*.h5
+
+# Environment
+.env
+*.env
+.venv/
+*.DS_Store
