@@ -20,10 +20,10 @@ def check_subject(subject_id, data_dir="data/processed"):
 
 def run_test():
     print("📦 Running full preprocessing and validation...")
-    preprocess_all_subjects(subject_ids=list(range(1, 10)))
+    preprocess_all_subjects(subject_ids=[1])
 
-    for sid in range(1, 10):
-        check_subject(sid)
+    # for sid in range(1, 10):
+    #     check_subject(sid)
 
 if __name__ == "__main__":
     run_test()

@@ -49,7 +49,12 @@ class EEGDataset(Dataset):
             
         return x, y
     
-def get_dataloader(subject_ids, batch_size=64, shuffle=True, data_dir="data/processed"):
-    dataset = EEGDataset(subject_ids=subject_ids, data_dir = data_dir)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
-    return loader
+# def get_dataloader(subject_ids, batch_size=64, shuffle=True, data_dir="data/processed"):
+#     dataset = EEGDataset(subject_ids=subject_ids, data_dir = data_dir)
+#     loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+#     return loader
+def get_dataloader(subject_ids, batch_size=32, shuffle=True, data_dir='data/processed', return_dataset=False):
+    dataset = EEGDataset(subject_ids=subject_ids, data_dir=data_dir)
+    if return_dataset:
+        return dataset  # <-- this is the missing part
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
