@@ -32,6 +32,10 @@ class EEGDataset(Dataset):
             
         self.X = np.concatenate(self.X, axis=0)
         self.y = np.concatenate(self.y, axis=0)
+        # print(f"X shape: {self.X.shape}, y shape: {self.y.shape}")
+        # print(f"X dtype: {self.X.dtype}, y dtype: {self.y.dtype}")
+        # print(f"y unique: {np.unique(self.y)}")
+
         
     def __len__(self):
         return len(self.y)

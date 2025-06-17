@@ -63,8 +63,6 @@ for cls in range(4):
 X_small = np.concatenate(X_small, axis=0)
 y_small = np.concatenate(y_small, axis=0)
 
-
-
 X_train = np.expand_dims(X_train, axis=1)    # from (N, 22, 1001) → (N, 1, 22, 1001)
 X_val = np.expand_dims(X_val, axis=1)        # from (N, 22, 1001) → (N, 1, 22, 1001)
 

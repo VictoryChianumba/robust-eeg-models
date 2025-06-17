@@ -63,6 +63,7 @@ def preprocessed_subject(subject_id, data_dir="data/raw", save_dir="data/process
     )
     
     X = epochs.get_data()
+    
     # Get integer class indices 0–3
     # label_map = {
     # event_dict['769']: 0,
