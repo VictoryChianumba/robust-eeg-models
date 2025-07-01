@@ -40,6 +40,10 @@ def preprocessed_subject(subject_id, data_dir="data/raw", save_dir="data/process
 
     raw.filter(BANDPASS_LOWER, BANDPASS_UPPER, fir_design = 'firwin')
     
+    # Common Average Reference
+    raw.set_eeg_reference('average', projection=True)
+    raw.apply_proj()
+    
     # events, _ = mne.events_from_annotations(raw)
     events, event_dict = mne.events_from_annotations(raw)
     event_id, label_map = get_motor_event_mapping(event_dict)
