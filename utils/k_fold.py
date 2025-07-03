@@ -51,7 +51,7 @@ def k_fold_cross_validation(X, y, model_class, k_folds=5, epochs=150, batch_size
         # Fresh model for this fold
         model = model_class().to(device)
         # optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
-        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
+        optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=1e-4)
 
        
         

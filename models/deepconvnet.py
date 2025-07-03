@@ -1,35 +1,45 @@
 import torch
-import torch.nn as nn 
-import torch.nn.functional as F 
+import torch.nn as nn
 
 class DeepConvNet(nn.Module):
     def __init__(self, num_classes=4, channels=22, samples=1001):
-        super(DeepConvNet, self).__init__()
-        
-        self.conv_block = nn.Sequential(
-            nn.Conv2d(1, 25, (1, 10)),
-            nn.Conv2d(25, 25, (channels, 1)),
-            nn.ELU(), 
-            nn.MaxPool2d((1, 2)),
-            # nn.Dropout(0.25),
-            
-            nn.Conv2d(25, 50, (1, 10)),
-            nn.ELU(), 
-            nn.MaxPool2d((1, 2)),
-            # nn.Dropout(0.25),
-        )
-        
-        # Use dummy input to infer flattened size
-        with torch.no_grad():
-            dummy = torch.zeros(1, 1, channels, samples)
-            flat_dim = self.conv_block(dummy).view(1, -1).shape[1]
+        super().__init__()
 
-        self.classify = nn.Linear(flat_dim, num_classes)
-        
-        #self.classify = nn.Linear(200 * (samples // (2 * 4)), num_classes)  
-        
+        self.features = nn.Sequential(
+            nn.Conv2d(1, 25, kernel_size=(1, 5), stride=1, padding=0),
+            nn.Conv2d(25, 25, kernel_size=(channels, 1), stride=1),
+            nn.BatchNorm2d(25),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=(1, 2)),
+            nn.Dropout(0.5),
+
+            nn.Conv2d(25, 50, kernel_size=(1,5), stride=1, padding=0),
+            nn.BatchNorm2d(50),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=(1, 2)),
+            nn.Dropout(0.5),
+
+            nn.Conv2d(50, 100, kernel_size=(1,5), stride=1, padding=0),
+            nn.BatchNorm2d(100),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=(1, 2)),
+            nn.Dropout(0.5),
+
+            nn.Conv2d(100, 200, kernel_size=(1,5), stride=1, padding=0),
+            nn.BatchNorm2d(200),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=(1, 2)),
+            nn.Dropout(0.5),
+        )
+
+        # compute the flattened dimension after 4 blocks
+        dummy = torch.zeros(1, 1, channels, samples)
+        out = self.features(dummy)
+        flattened = out.view(1, -1).shape[1]
+
+        self.classify = nn.Linear(flattened, num_classes)
+
     def forward(self, x):
-        x = self.conv_block(x)
-        x = x.view(x.size(0), -1)   
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
         return self.classify(x)
-    
