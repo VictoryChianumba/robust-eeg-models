@@ -52,7 +52,7 @@ class DeepConvNet(nn.Module):
         # x = self.elu(x)
         # x = self.pool(x)
         # x = self.dropout(x)
-        # x = self.globalpool(x)
+        x = self.globalpool(x)
         x = x.view(x.size(0), -1)
         print(f"flattened shape: {x.shape}")
         return self.classify(x)
