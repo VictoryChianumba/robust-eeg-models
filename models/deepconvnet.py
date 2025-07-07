@@ -65,5 +65,4 @@ class DeepConvNet(nn.Module):
     def forward(self, x):
         x = self._forward_conv(x)
         x = x.view(x.size(0), -1)
-        print(f"flattened shape: {x.shape}")
         return self.classify(x)
