@@ -27,9 +27,15 @@ class DeepConvNet(nn.Module):
 
         self.globalpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.classify = nn.Linear(50, num_classes)
+        # Calculate the input size for the linear layer dynamically
+        # We need a dummy forward pass to determine this
+        dummy_input = torch.randn(1, 1, channels, samples)
+        dummy_output = self._forward_conv(dummy_input)
+        flattened_size = dummy_output.view(1, -1).size(1)
 
-    def forward(self, x):
+        self.classify = nn.Linear(flattened_size, num_classes)
+
+    def _forward_conv(self, x):
         x = self.conv1(x)
         x = self.batchnorm1(x)
         x = self.conv2(x)
@@ -53,6 +59,11 @@ class DeepConvNet(nn.Module):
         # x = self.pool(x)
         # x = self.dropout(x)
         x = self.globalpool(x)
+        return x
+
+
+    def forward(self, x):
+        x = self._forward_conv(x)
         x = x.view(x.size(0), -1)
         print(f"flattened shape: {x.shape}")
         return self.classify(x)
