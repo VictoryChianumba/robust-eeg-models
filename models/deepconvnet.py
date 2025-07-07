@@ -25,7 +25,7 @@ class DeepConvNet(nn.Module):
         self.conv5 = nn.Conv2d(100, 200, (1, 5), padding=(0, 2))
         self.batchnorm5 = nn.BatchNorm2d(200)
 
-        self.classify = nn.Linear(50 * int(samples/16), num_classes)
+        self.classify = nn.Linear(50 * int(samples/4), num_classes)
 
     def forward(self, x):
         x = self.conv1(x)
