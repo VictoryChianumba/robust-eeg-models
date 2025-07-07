@@ -27,7 +27,7 @@ class DeepConvNet(nn.Module):
 
         self.globalpool = nn.AdaptiveAvgPool2d((1, 1))
 
-        self.classify = nn.Linear(200, num_classes)
+        self.classify = nn.Linear(50, num_classes)
 
     def forward(self, x):
         x = self.conv1(x)
