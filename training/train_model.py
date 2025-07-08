@@ -1,4 +1,7 @@
 
+import torch
+import optuna
+
 def train_model(model, train_loader, val_loader, lr, weight_decay, epochs, trial=None):
   
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
