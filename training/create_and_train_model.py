@@ -28,18 +28,10 @@ def create_and_train_model(trial, train_loader, val_loader, model_type='EEGNet',
     
     return best_val_acc
 
-# Run optimization
-study = optuna.create_study(
-    direction='maximize',
-    pruner=optuna.pruners.MedianPruner(n_startup_trials=5)
-)
+# # Results
+# print(f"Best trial: {study.best_trial.value:.4f}")
+# print(f"Best params: {study.best_params}")
 
-study.optimize(create_and_train_model(), n_trials=100, timeout=3600*8)  # 8 hours
-
-# Results
-print(f"Best trial: {study.best_trial.value:.4f}")
-print(f"Best params: {study.best_params}")
-
-# Visualization
-optuna.visualization.plot_optimization_history(study).show()
-optuna.visualization.plot_param_importances(study).show()
+# # Visualization
+# optuna.visualization.plot_optimization_history(study).show()
+# optuna.visualization.plot_param_importances(study).show()
