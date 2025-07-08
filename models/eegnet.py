@@ -1,35 +1,36 @@
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 class EEGNet(nn.Module):
-    def __init__(self, num_classes=4, channels=22, samples=1125):
+    def __init__(self, num_classes=4, channels=22, samples=1125, F1=8, D=2, dropout=0.25):
         super(EEGNet, self).__init__()
         
         self.activations = {}
 
         self.firstconv = nn.Sequential(
-            nn.Conv2d(1, 16, (1, 51), padding=(0, 25), bias=False),
-            nn.BatchNorm2d(16)
+            nn.Conv2d(1, F1, (1, 51), padding=(0, 25), bias=False),
+            nn.BatchNorm2d(F1)
         )
 
         self.depthwiseConv = nn.Sequential(
-            nn.Conv2d(16, 32, (channels, 1), groups=16, bias=False),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(F1, F1*D, (channels, 1), groups=F1, bias=False),
+            nn.BatchNorm2d(F1*D),
             nn.ELU(),
             nn.AvgPool2d((1, 4)),
-            nn.Dropout(0.25)
+            nn.Dropout(dropout)
         )
 
         self.separableConv = nn.Sequential(
-            nn.Conv2d(32, 32, (1, 15), padding=(0, 7), bias=False),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(F1*D, F1*D, (1, 15), padding=(0, 7), bias=False),
+            nn.BatchNorm2d(F1*D),
             nn.ELU(),
             nn.AvgPool2d((1, 8)),
-            nn.Dropout(0.25)
+            nn.Dropout(dropout)
         )
 
-        self.classify = nn.Linear(32 * ((samples // 32)), num_classes)
+        self.classify = nn.Linear((F1*D) * ((samples // 32)), num_classes)
 
     def forward(self, x):
         x = self.firstconv(x)
