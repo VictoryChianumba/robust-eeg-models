@@ -1,13 +1,16 @@
 
+
+
 import torch
 import optuna
+import torch.nn as nn
 
 def train_model(model, train_loader, val_loader, lr, weight_decay, epochs, trial=None):
   
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr[model], weight_decay=weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     criterion = nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5)
     
