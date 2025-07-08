@@ -1,6 +1,11 @@
 
+
 import torch
 import optuna
+import numpy as np
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from training.create_and_train_model import create_and_train_model
 
 def run_optimization(X, y, model_type='EEGNet', n_trials=50):
     # Data preparation (done once)
