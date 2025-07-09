@@ -19,13 +19,8 @@ class DeepConvNet(nn.Module):
         self.conv3 = nn.Conv2d(25, 50, (1, 5), padding=(0, 2))
         self.batchnorm3 = nn.BatchNorm2d(50)
 
-        self.conv4 = nn.Conv2d(50, 100, (1, 5), padding=(0, 2))
-        self.batchnorm4 = nn.BatchNorm2d(100)
 
-        self.conv5 = nn.Conv2d(100, 200, (1, 5), padding=(0, 2))
-        self.batchnorm5 = nn.BatchNorm2d(200)
-
-        self.classify = nn.Linear(200 * int(samples/16), num_classes)
+        self.classify = nn.Linear(50 * int(samples/4), num_classes)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -40,15 +35,6 @@ class DeepConvNet(nn.Module):
         x = self.elu(x)
         x = self.pool(x)
         x = self.dropout(x)
-        # x = self.conv4(x)
-        # x = self.batchnorm4(x)
-        # x = self.elu(x)
-        # x = self.pool(x)
-        # x = self.dropout(x)
-        # x = self.conv5(x)
-        # x = self.batchnorm5(x)
-        # x = self.elu(x)
-        # x = self.pool(x)
-        # x = self.dropout(x)
+        
         x = x.view(x.size(0), -1)
         return self.classify(x)
