@@ -1,13 +1,13 @@
-
-
 import torch
 import optuna
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from training.create_and_train_model import create_and_train_model
+from training.save_study_results import save_study_results
 
-def run_optimization(X, y, model_type='EEGNet', n_trials=50):
+def run_optimization(X, y, model_type='EEGNet', n_trials=50, save_every=5):
+
     # Data preparation (done once)
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
@@ -34,8 +34,28 @@ def run_optimization(X, y, model_type='EEGNet', n_trials=50):
             trial, train_loader, val_loader, model_type, 
             num_classes, channels, samples
         )
+
+    # Create study with database storage
+    study = optuna.create_study(
+        direction='maximize',
+        study_name=f'{model_type}_optimization',
+        storage=f'sqlite:///{model_type}_study.db',  # Saves to database
+        load_if_exists=True  # Resume if exists
+    )
     
-    study = optuna.create_study(direction='maximize')
+    # Callback to save every few trials
+    def save_callback(study, trial):
+        if trial.number % save_every == 0:
+            save_study_results(study, f'{model_type}_trial_{trial.number}')
+            print(f"💾 Progress saved at trial {trial.number}")
+    
+    
     study.optimize(objective, n_trials=n_trials)
+
+    # Run optimization with callback
+    study.optimize(objective, n_trials=n_trials, callbacks=[save_callback])
+    
+    # Final save
+    save_study_results(study, f'{model_type}_final')
     
     return study
