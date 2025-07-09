@@ -1,0 +1,13 @@
+{
+  "best_value": 0.6325940212150434,
+  "best_params": {
+    "batch_size": 16,
+    "lr": 0.0008704749593073274,
+    "weight_decay": 0.002451031998106575,
+    "dropout": 0.12988679302154116,
+    "F1": 32,
+    "D": 2
+  },
+  "n_trials": 62,
+  "study_name": "EEGNet_optimization"
+}
