@@ -31,6 +31,3 @@ def save_study_results(study, filename_prefix):
     print(f"  - {filename_prefix}_study.pkl (full study)")
     print(f"  - {filename_prefix}_best_results.json (best config)")
     print(f"  - {filename_prefix}_all_trials.csv (all trials)")
-
-# Usage after your study completes
-save_study_results(study, 'eegnet_optimization_20trials')
