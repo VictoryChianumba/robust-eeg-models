@@ -1,0 +1,11 @@
+{
+  "best_value": 0.5930568948891032,
+  "best_params": {
+    "batch_size": 16,
+    "lr": 0.0009125453828332987,
+    "weight_decay": 3.5161560154775886e-06,
+    "dropout": 0.1600960468442516
+  },
+  "n_trials": 60,
+  "study_name": "DeepConvNet_optimization"
+}
