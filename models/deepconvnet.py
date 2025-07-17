@@ -8,7 +8,7 @@ class DeepConvNet(nn.Module):
     Source: "Deep learning with convolutional neural networks for EEG decoding and visualization"
     """
     
-    def __init__(self, num_classes=4, channels=22, samples=1125, dropout_rate=0.5):
+    def __init__(self, num_classes=4, channels=22, samples=1125, dropout=0.5):
         super().__init__()
         
         # First convolution block
@@ -17,28 +17,28 @@ class DeepConvNet(nn.Module):
         self.bnorm1 = nn.BatchNorm2d(25, eps=1e-05, momentum=0.1)
         self.elu1 = nn.ELU()
         self.pool1 = nn.MaxPool2d(kernel_size=(1, 3))
-        self.dropout1 = nn.Dropout(dropout_rate)
+        self.dropout1 = nn.Dropout(dropout)
         
         # Second convolution block
         self.conv2 = nn.Conv2d(25, 50, (1, 10), bias=True)
         self.bnorm2 = nn.BatchNorm2d(50, eps=1e-05, momentum=0.1)
         self.elu2 = nn.ELU()
         self.pool2 = nn.MaxPool2d(kernel_size=(1, 3))
-        self.dropout2 = nn.Dropout(dropout_rate)
+        self.dropout2 = nn.Dropout(dropout)
         
         # Third convolution block
         self.conv3 = nn.Conv2d(50, 100, (1, 10), bias=True)
         self.bnorm3 = nn.BatchNorm2d(100, eps=1e-05, momentum=0.1)
         self.elu3 = nn.ELU()
         self.pool3 = nn.MaxPool2d(kernel_size=(1, 3))
-        self.dropout3 = nn.Dropout(dropout_rate)
+        self.dropout3 = nn.Dropout(dropout)
         
         # Fourth convolution block
         self.conv4 = nn.Conv2d(100, 200, (1, 10), bias=True)
         self.bnorm4 = nn.BatchNorm2d(200, eps=1e-05, momentum=0.1)
         self.elu4 = nn.ELU()
         self.pool4 = nn.MaxPool2d(kernel_size=(1, 3))
-        self.dropout4 = nn.Dropout(dropout_rate)
+        self.dropout4 = nn.Dropout(dropout)
         
         # Calculate feature dimension
         self._get_feature_dim(channels, samples)
