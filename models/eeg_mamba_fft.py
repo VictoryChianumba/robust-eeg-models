@@ -8,7 +8,7 @@ from braindecode.models.base import EEGModuleMixin
 # 1. FFT-Based Mamba Implementation (No external dependencies)
 # ------------------------------------------------------------------
 class FFTMamba(nn.Module):
-    def __init__(self, d_model: int, d_state: int = 16, bidirectional: bool = True,
+    def __init__(self, d_model: int, d_state: int = 64, bidirectional: bool = True,
                  dropout: float = 0.3):
         super().__init__()
         self.d_state = d_state
@@ -38,24 +38,39 @@ class FFTMamba(nn.Module):
         out = self.dropout(self.C_proj(y)) + self.D * x
         return out
 
-class STAdaptive(nn.Module):
-    """Spatially-adaptive 1×1 conv + class token."""
-    def __init__(self, n_chans: int, d_model: int = 128):
+class SpatialDW(nn.Module):
+    """
+    Spatial 1×1 conv (C → D)  followed by depth-wise 1-D temporal conv.
+    Keeps (B, C, T) → (B, T, D).
+    """
+    def __init__(self, n_chans: int, d_model: int, kernel: int = 15, dropout: float = 0.0):
         super().__init__()
-        self.proj = nn.Conv1d(n_chans, d_model, kernel_size=1, bias=False)
+        self.spatial = nn.Conv2d(1, d_model, (n_chans, 1), bias=False)   # (B,1,C,T)→(B,D,1,T)
+        self.temporal = nn.Conv1d(
+            d_model, d_model, kernel_size=kernel,
+            padding=kernel//2, groups=d_model, bias=False
+        )
         self.cls = nn.Parameter(torch.randn(1, 1, d_model))
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):               # (B, C, T)
-        z = self.proj(x).transpose(1, 2)        # (B, T, D)
-        cls = self.cls.expand(z.size(0), -1, -1)
-        return torch.cat([cls, z], dim=1)       # (B, T+1, D)
-
+        x = x.unsqueeze(1)              # (B,1,C,T)
+        x = self.spatial(x).squeeze(2)  # (B,D,T)
+        x = self.temporal(x)            # (B,D,T)
+        x = x.transpose(1, 2)           # (B,T,D)
+        cls = self.cls.expand(x.size(0), -1, -1)
+        return torch.cat([cls, x], dim=1)   # (B,T+1,D)
 
 class BiMambaBlock(nn.Module):
-    def __init__(self, d_model: int, d_state: int = 16, dropout: float = 0.1, ffn_mult: int = 2):
+    def __init__(self, d_model, d_state=64, dropout=0.1, ffn_mult=2):
         super().__init__()
         self.norm1 = nn.LayerNorm(d_model)
         self.mamba = FFTMamba(d_model, d_state=d_state, bidirectional=True, dropout=dropout)
+
+        # depth-wise temporal conv
+        self.temporal = nn.Conv1d(
+            d_model, d_model, kernel_size=15, padding=7, groups=d_model, bias=False
+        )
 
         self.norm2 = nn.LayerNorm(d_model)
         self.ffn = nn.Sequential(
@@ -65,8 +80,11 @@ class BiMambaBlock(nn.Module):
             nn.Linear(ffn_mult * d_model, d_model),
         )
 
-    def forward(self, x):
+    def forward(self, x):                # (B, T, D)
         x = x + self.mamba(self.norm1(x))
+        # depth-wise conv
+        y = self.temporal(x.transpose(1, 2)).transpose(1, 2)
+        x = x + y
         x = x + self.ffn(self.norm2(x))
         return x
 
@@ -116,6 +134,8 @@ class EEGMamba(EEGModuleMixin, nn.Module):
         # EEGMamba specific parameters
         d_model=128,
         n_layers=8,
+        d_state=64,          # bigger state
+        dropout=0.3,         # overall dropout
         n_experts=9,
         k=2,
         # Backward compatibility aliases
@@ -139,11 +159,14 @@ class EEGMamba(EEGModuleMixin, nn.Module):
         self.n_layers = n_layers
         self.n_experts = n_experts
         self.k = k
+        self.d_state = d_state
+        self.dropout = dropout
+        
         
         # Build the model
-        self.st_adaptive = STAdaptive(self.n_chans, d_model)
+        self.st_dw = SpatialDW(self.n_chans, d_model)
         self.layers = nn.ModuleList([
-            BiMambaBlock(d_model) for _ in range(n_layers)
+            BiMambaBlock(d_model, d_state=d_state, dropout=dropout) for _ in range(n_layers)
         ])
         self.norm = nn.LayerNorm(d_model)
         
@@ -168,7 +191,7 @@ class EEGMamba(EEGModuleMixin, nn.Module):
             logits: Output tensor [batch_size, n_outputs]
         """
         # Spatial-temporal adaptive processing
-        x = self.st_adaptive(x)  # (B, T+1, D)
+        x = self.st_dw(x)  # (B, T+1, D)
         
         # Bidirectional Mamba layers
         for layer in self.layers:
@@ -176,6 +199,7 @@ class EEGMamba(EEGModuleMixin, nn.Module):
         
         # Use class token
         x = self.norm(x).mean(dim=1)   # (B, D)
+        # x = self.norm(x[:, 0])
         
         # Classification
         if self.use_moe:
