@@ -6,7 +6,7 @@ from braindecode import EEGClassifier
 from skorch.helper import predefined_split
 import pandas as pd
 
-def train_single_run(model_name, subject_id, seed, dataset):
+def train_single_run(model_name, subject_id, seed, dataset, config, device):
 
     # 0. RNG reproducibility ---------------------------------------------------
 
@@ -37,8 +37,6 @@ def train_single_run(model_name, subject_id, seed, dataset):
 
     # 2. model & config --------------------------------------------------------
 
-    # Get model config
-    config = MODEL_CONFIGS[model_name]
 
     # Extract model params from dataset, initialise model and set hyper-parameters
     # classes needed for clf
@@ -99,7 +97,7 @@ def train_single_run(model_name, subject_id, seed, dataset):
 # ==============================================================================
 
 # Generate final baseline table
-def create_baseline_table(results):
+def create_baseline_table(results, subjects: list):
     """Create a nice table of baselines"""
     rows = []
 

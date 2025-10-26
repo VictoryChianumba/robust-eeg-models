@@ -1,11 +1,16 @@
 # ========= Cell 2: Attacks, IG explainer, and sweep runners =========
 import numpy as np, torch, torch.nn.functional as F
 import torchattacks as ta
-import captum.attr as CA
 from attack import attack_metrics as am
 
-# ---------------- utilities ----------------
-CH_NAMES = None  
+class AttackExplainers():
+    def __init__(self, ATTR_MAX_N, N_STEPS_IG, IG_INT_BS, ig):
+        self.ATTR_MAX_N = ATTR_MAX_N
+        self.N_STEPS_IG = N_STEPS_IG
+        self.IG_INT_BS = IG_INT_BS
+        self.ig = ig
+    
+        self.CH_NAMES = None  
 
 
 def per_channel_clamp(x, vmin, vmax):
@@ -40,7 +45,7 @@ def smooth_delta_gauss(delta_t: torch.Tensor, sigma_t: float) -> torch.Tensor:
 
 # ---------------- μV budgets & mapping (use PRENORM stats) ----------------
 # Will be set in setup_subject(): prenorm_std_np, median_std_pre
-muV_grid = [0.25, 0.5, 1.0, 2.0]  # report-ready grid
+
 def eps_from_muV(mu_v):   # scalar ε in z-space
     return float(mu_v / median_std_pre)
 
@@ -48,28 +53,28 @@ def eps_uV_per_channel(eps_z):  # per-channel μV implied by εᶻ
     return (eps_z * prenorm_std_np).tolist()
 
 # ---------------- IG explainer ----------------
-def pick_subset(X_in, y_in, max_n=None):
-    if max_n is None: max_n = ATTR_MAX_N
+def pick_subset(self, X_in, y_in, max_n=None):
+    if max_n is None: max_n = self.ATTR_MAX_N
     if max_n and X_in.size(0) > max_n:
         return X_in[:max_n], y_in[:max_n]
     return X_in, y_in
 
-def attr_IG(X_in, y_in):
+def attr_IG(self, X_in, y_in):
     Xi, yi = pick_subset(X_in, y_in)
     Xi = Xi.detach().clone().requires_grad_(True)
     # internal_batch_size must be >= #examples to avoid Captum warning
     internal_bs = int(Xi.size(0))
-    return ig.attribute(
-        Xi, target=yi, n_steps=N_STEPS_IG,
+    return self.ig.attribute(
+        Xi, target=yi, n_steps=self.N_STEPS_IG,
         baselines=torch.zeros_like(Xi),
         internal_batch_size=internal_bs
     )
 
-# single registry (we dropped LRP)
+
 EXPLAINERS = {"IG": attr_IG}
 
 # ---------------- L_inf sweep (FGSM/PGD) ----------------
-def run_linf_sweep(atk_name, eps_list_muV, steps=None, alpha_rule=lambda e: e/8,
+def run_linf_sweep(self, atk_name, eps_list_muV, steps=None, alpha_rule=lambda e: e/8,
                    batch=128, seed=42, lp_sigma_t=None, cap_idx=None, E_CLEAN=None):
     global model, X, y, train_min_t, train_max_t, prenorm_std_np
 
@@ -177,8 +182,8 @@ def run_linf_sweep(atk_name, eps_list_muV, steps=None, alpha_rule=lambda e: e/8,
         for m in E_CLEAN.keys():
             Ec, Ea = E_CLEAN[m], E_ADV[m]
             # top-5 lists & ROI share of top-5
-            top5_clean = am.topk_channels(Ec, k=5, ch_names=CH_NAMES)
-            top5_adv   = am.topk_channels(Ea, k=5, ch_names=CH_NAMES)
+            top5_clean = am.topk_channels(Ec, k=5, ch_names=self.CH_NAMES)
+            top5_adv   = am.topk_channels(Ea, k=5, ch_names=self.CH_NAMES)
             row_method = {
                 f"spearman_{m}":             am.spearman_ch(Ec, Ea),
                 f"roi_share_clean_{m}":      am.roi_share(Ec),
@@ -199,7 +204,7 @@ def run_linf_sweep(atk_name, eps_list_muV, steps=None, alpha_rule=lambda e: e/8,
     return rows
 
 # ---------------- DeepFool (L2) ----------------
-def run_deepfool(batch=128, seed=42, cap_idx=None, E_CLEAN=None):
+def run_deepfool(self, batch=128, seed=42, cap_idx=None, E_CLEAN=None):
     atk = ta.DeepFool(model, steps=50)
     preds_adv=[]; snrs=[]; l2_all=[]; l2_succ=[]; linf_all=[]; boundary_hits=[]
     N=X.size(0)
@@ -251,8 +256,8 @@ def run_deepfool(batch=128, seed=42, cap_idx=None, E_CLEAN=None):
     rows=[]
     for m in E_CLEAN.keys():
         Ec, Ea = E_CLEAN[m], E_ADV[m]
-        top5_clean = am.topk_channels(Ec, k=5, ch_names=CH_NAMES)
-        top5_adv   = am.topk_channels(Ea, k=5, ch_names=CH_NAMES)
+        top5_clean = am.topk_channels(Ec, k=5, ch_names=self.CH_NAMES)
+        top5_adv   = am.topk_channels(Ea, k=5, ch_names=self.CH_NAMES)
         rows.append({
             "attack": "DeepFool_L2",
             "norm": "L2",

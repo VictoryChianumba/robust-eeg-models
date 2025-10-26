@@ -39,7 +39,7 @@ def load_subject_data(dataset, subject_id):
 
 
 
-    pre_noems = [
+    pre_norms = [
         Preprocessor("pick_types", eeg=True, meg=False, stim=False),
         Preprocessor(lambda data, factor: np.multiply(data, factor), factor=1e6),
         Preprocessor("filter", l_freq=low_cut_hz, h_freq=high_cut_hz),
@@ -49,7 +49,7 @@ def load_subject_data(dataset, subject_id):
     ]
 
 
-    preprocess(dataset, pre_noems, n_jobs=-1)
+    preprocess(dataset, pre_norms, n_jobs=-1)
 
 
 

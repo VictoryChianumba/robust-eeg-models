@@ -6,7 +6,7 @@ seaborn
 jupyterlab
 adversarial-robustness-toolbox
 shap
-
+statsmodels
 torch
 torchvision
 torchaudio
@@ -19,4 +19,5 @@ advertorch
 foolbox
 captum
 braindecode @ git+https://github.com/braindecode/braindecode.git@master
-auto-attack @ git+https://github.com/fra31/auto-attack 
+autoattack @ git+https://github.com/fra31/auto-attack
+

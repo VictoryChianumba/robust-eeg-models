@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-# ----- channel-wise score: mean |E| over time -----
+
 def channel_scores(E):  # (N,C,T) -> (N,C)
     return E.abs().mean(dim=-1).detach().cpu().numpy()
 
@@ -15,7 +15,6 @@ def spearman_ch(Ec, Ea):
         if not np.isnan(r): vals.append(r)
     return float(np.mean(vals)) if vals else float("nan")
 
-# ----- ROI helpers -----
 MOTOR_ROI = ["C3","C4","Cz"]
 CH_NAMES = None  
 
