@@ -1,6 +1,11 @@
 from repr import repr_helpers as rp
 import torch
 import os, json, pickle, numpy as np, numbers
+
+# Define constants
+SAVE_DIR = "results"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+
 def _save_run(model_name, subject_id, seed, clf, test_set,
               rng_state_np, rng_state_torch,
               train_idx, val_idx, test_idx,
@@ -8,7 +13,7 @@ def _save_run(model_name, subject_id, seed, clf, test_set,
               train_min=None, train_max=None,
               model_config: dict = None,
               env_fingerprint: dict = None,
-              device: str=device):
+              device: str = device):
     """
     clf          : fitted skorch net (clf.module_ is torch.nn.Module)
     test_set     : braindecode Dataset (getitem -> (x, y))

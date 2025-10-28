@@ -90,7 +90,7 @@ def train_single_run(model_name, subject_id, seed, dataset, config, device):
               clf, test_set, rng_state_np, rng_state_torch,
               train_idx, val_idx, test_idx,
               train_mean, train_std, train_min, train_max,
-              config, env_fp)
+              config, env_fp, device)
 
     return test_accuracy
 
