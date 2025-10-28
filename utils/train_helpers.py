@@ -1,7 +1,7 @@
 from repr import repr_helpers as rp
 import numpy as np
 import torch
-import load_subject as ls
+from utils import load_subject as ls
 from braindecode import EEGClassifier
 from skorch.helper import predefined_split
 import pandas as pd
