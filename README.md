@@ -77,7 +77,7 @@ robust-eeg-models/
 │   ├── load_subject.py              # Load subject-specific EEG data
 │   └── train_helpers.py             # Training utilities
 │
-└── repr/                            # [Placeholder: add description]
+└── repr/                            
     ├── repr_helpers.py
     └── save_run.py
 ```
