@@ -47,6 +47,7 @@ robust-eeg-models/
 ├── main.py                          # Baseline model training & evaluation
 ├── adv_run.py                       # Adversarial attack pipeline
 ├── analysis.py                      # Analysis pipeline
+├── blindspot.py                     # calculate blindspot
 ├── requirements.txt                 # Python dependencies
 │
 ├── training/
@@ -64,21 +65,17 @@ robust-eeg-models/
 │   └── attack_metrics.py            
 │
 ├── analysis/
-│   ├── clean_data.py                # Data cleaning & preprocessing
-│   ├── statistical_analysis.py      # Hypothesis testing, effect sizes
+│   ├── aggregate.py                
 │   ├── attack_summary.py            # Aggregate results & reporting
+│   ├── clean_data.py                # Data cleaning preprocessing
+│   ├── create_figures.py            # Create initial attack analysis figures
+│   ├── statistical_analysis.py      # Hypothesis testing, effect sizes
 │   └── visualizations.py            # Plotting utilities
 │
 ├── utils/
 │   ├── load_adv_data.py             # Load adversarial results
 │   ├── load_subject.py              # Load subject-specific EEG data
 │   └── train_helpers.py             # Training utilities
-│
-├── notebooks/
-│   ├── 01_preprocessing.ipynb       # EEG preprocessing pipeline
-│   ├── 02_training_clean.ipynb      # Model training
-│   ├── 03_adversarial_training.ipynb # Adversarial evaluation
-│   └── 04_interpretability.ipynb     # Explanation analysis
 │
 └── repr/                            # [Placeholder: add description]
     ├── repr_helpers.py
@@ -130,7 +127,7 @@ Frontiers in Neuroscience, 6, 55.
 ```
 **Subjects:** 4 subjects (selected based on data quality)
 
-**Seed Strategy:** Results aggregated across multiple random seeds (see `attack/attack_metrics.py` for statistical controls)
+**Seed Strategy:** Results aggregated across multiple random seeds (see `analysis/aggregate.py` for statistical controls)
 
 **Statistical Methods:**
 - Seed aggregation before analysis (reduced pseudo-replication)
@@ -153,6 +150,11 @@ python adv_run.py
 ### Run analysis
 ```
 python analysis.py
+```
+
+### Run blindspot analysis
+```
+python blindspot.py
 ```
 
 ## Installation & Requirements
@@ -184,7 +186,7 @@ make clean       # Remove virtual environment
 
 ## Contact
 
-[chianumbav@icloud.com or GitHub issues]
+chianumbav@icloud.com or GitHub issues
 
 ---
 

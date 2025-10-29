@@ -1,9 +1,13 @@
 import pandas as pd
 from analysis import clean_data as cd
-from analysis import attack_summary as ats
+from analysis.create_figures import create_adv_figures
+from analysis.aggregate import aggregate_across_seeds
+from analysis import statistical_analysis as sa
+from analysis import visualizations as vis
 
+file = "./results/adversarial_results_MASTER.csv"
 
-df = pd.read_csv("./results/adversarial_results_MASTER.csv")
+df = pd.read_csv(file)
 df = df.dropna(axis=1, how='all')
 
 # Clean data
@@ -15,21 +19,11 @@ columns_to_drop = ['eps_z', 'random_start','adv_acc','steps', 'alpha', 'smooth' 
 df_clean_all = df_clean_master.drop(columns=columns_to_drop)
 
 # create attack summary
-df, successful_df, threshold = ats.load_and_prepare_data('/Users/temp/Documents/Bath University/Msc/Disseration /EEG_Project/results/adversarial_results_MASTER.csv')
-summary = ats.calculate_attack_summary(successful_df)
+create_adv_figures(file)
 
-# Create individual plots
-easr_fig = ats.plot_easr_comparison(summary)
-spearman_fig = ats.plot_spearman_comparison(summary)
-scatter_fig = ats.plot_asr_vs_stability_scatter(summary)
-arch_fig = ats.plot_architecture_comparison(successful_df, threshold)
-detailed_fig = ats.plot_deepfool_detailed_analysis(successful_df)
 
-# Save plots
-easr_fig.savefig('training/figures/easr_comparison.png', dpi=300, bbox_inches='tight')
-spearman_fig.savefig('training/figures/spearman_comparison.png', dpi=300, bbox_inches='tight')
-scatter_fig.savefig('training/figures/asr_vs_stability.png', dpi=300, bbox_inches='tight')
-arch_fig.savefig('training/figures/architecture_heatmap.png', dpi=300, bbox_inches='tight')
-detailed_fig.savefig('training/figures/deepfool_detailed_analysis.png', dpi=300, bbox_inches='tight')
+df_aggregated = aggregate_across_seeds(df_clean_all)
+df_analysis = sa.statistical_analysis(df_aggregated)
 
-plt.show()
+# Create visualizations
+fig1, fig2 = vis.create_visualizations(df_analysis)
