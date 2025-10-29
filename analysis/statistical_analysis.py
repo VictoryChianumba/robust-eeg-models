@@ -10,12 +10,9 @@ import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 
 def statistical_analysis(df):
-    """
-    Comprehensive statistical analysis for interpretability-robustness study
-    """
-    print("="*60)
-    print("STATISTICAL ANALYSIS: INTERPRETABILITY-ROBUSTNESS STUDY")
-    print("="*60)
+
+
+    print(" INTERPRETABILITY-ROBUSTNESS STUDY")
 
     # Drop redundant columns
     columns_to_drop = ['eps_z', 'random_start','adv_acc','steps', 'alpha', 'smooth' ,
@@ -26,12 +23,8 @@ def statistical_analysis(df):
     df_analysis = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
     print(f"Analysis dataset shape: {df_analysis.shape}")
 
-    # ================================================================
-    # 1. PRIMARY RESEARCH QUESTION: Architecture-specific correlations
-    # ================================================================
-    print("\n" + "="*50)
     print("1. PRIMARY ANALYSIS: ASR vs Spearman_IG by Architecture")
-    print("="*50)
+
 
     # Overall correlation
     overall_corr_p = pearsonr(df_analysis['ASR'], df_analysis['spearman_IG'])
@@ -61,7 +54,6 @@ def statistical_analysis(df):
 
     # Test difference in correlations using Fisher's z-transform
     def fishers_z_test(r1, n1, r2, n2):
-        """Test difference between two correlation coefficients"""
         z1 = 0.5 * np.log((1 + r1) / (1 - r1))
         z2 = 0.5 * np.log((1 + r2) / (1 - r2))
         se = np.sqrt(1/(n1-3) + 1/(n2-3))
@@ -78,10 +70,8 @@ def statistical_analysis(df):
     print(f"\nFisher's z-test for correlation difference:")
     print(f"z = {z_stat:.4f}, p = {z_p:.4f}")
 
-    # ================================================================
+
     # 2. ARCHITECTURE DIFFERENCES IN ROBUSTNESS
-    # ================================================================
-    print("\n" + "="*50)
     print("2. ARCHITECTURE DIFFERENCES IN ROBUSTNESS")
     print("="*50)
 
@@ -108,12 +98,8 @@ def statistical_analysis(df):
     tukey_result = pairwise_tukeyhsd(df_analysis['ASR'], df_analysis['model_name'])
     print(tukey_result)
 
-    # ================================================================
-    # 3. ATTACK-SPECIFIC ANALYSIS
-    # ================================================================
-    print("\n" + "="*50)
-    print("3. ATTACK-SPECIFIC ANALYSIS")
-    print("="*50)
+    # ATTACK-SPECIFIC ANALYSIS
+    print("ATTACK-SPECIFIC ANALYSIS")
 
     # Correlations by attack type
     print("ASR vs Spearman_IG correlations by attack type:")
@@ -130,12 +116,9 @@ def statistical_analysis(df):
             }
             print(f"{attack}: r = {corr_p[0]:.4f}, p = {corr_p[1]:.4f}, n = {len(subset)}")
 
-    # ================================================================
-    # 4. ROBUST REGRESSION (accounting for subject clustering)
-    # ================================================================
+    # ROBUST REGRESSION (accounting for subject clustering)
     print("\n" + "="*50)
     print("4. ROBUST REGRESSION WITH SUBJECT CLUSTERING")
-    print("="*50)
 
     # Standard regression with clustered standard errors for subject effects
     df_attacks = df_budget[df_budget['attack'].isin(['FGSM', 'PGD', 'FGSM_LP', 'PGD_LP'])]
@@ -146,12 +129,9 @@ def statistical_analysis(df):
     print("Robust regression results (clustered by subject):")
     print(model_robust.summary().tables[1])
 
-    # ================================================================
-    # 5. INTERACTION EFFECTS: Budget × Architecture
-    # ================================================================
+    # INTERACTION EFFECTS: Budget × Architecture
     print("\n" + "="*50)
     print("5. INTERACTION EFFECTS: Budget × Architecture")
-    print("="*50)
 
     # Test for interaction in both ASR and spearman_IG
     print("Testing muV_budget × architecture interaction on ASR:")
@@ -166,12 +146,9 @@ def statistical_analysis(df):
     print(f"Interaction coefficient: {interaction_model_ig.params['muV_budget:C(architecture_type)[T.StateSpace]']:.4f}")
     print(f"Interaction p-value: {interaction_model_ig.pvalues['muV_budget:C(architecture_type)[T.StateSpace]']:.4f}")
 
-    # ================================================================
-    # 6. ROBUSTNESS CHECKS
-    # ================================================================
+    # ROBUSTNESS CHECKS
     print("\n" + "="*50)
     print("6. ROBUSTNESS CHECKS")
-    print("="*50)
 
     # Bootstrap confidence intervals for main correlation
     def bootstrap_correlation(x, y, n_boot=1000):
@@ -203,12 +180,9 @@ def statistical_analysis(df):
         corr_no_outliers = pearsonr(df_no_outliers['ASR'], df_no_outliers['spearman_IG'])
         print(f"Correlation without SNR outliers: r = {corr_no_outliers[0]:.4f}, p = {corr_no_outliers[1]:.4f}")
 
-    # ================================================================
-    # 7. EFFECT SIZES AND PRACTICAL SIGNIFICANCE
-    # ================================================================
+    # EFFECT SIZES AND PRACTICAL SIGNIFICANCE
     print("\n" + "="*50)
     print("7. EFFECT SIZES AND PRACTICAL SIGNIFICANCE")
-    print("="*50)
 
     # Cohen's d for architecture differences
     cnn_asr = df_analysis[df_analysis['architecture_type'] == 'CNN']['ASR']
@@ -236,7 +210,6 @@ def statistical_analysis(df):
     # Summary statistics table
     print("\n" + "="*50)
     print("8. SUMMARY STATISTICS BY ARCHITECTURE")
-    print("="*50)
 
     summary_stats = df_analysis.groupby('architecture_type')[['ASR', 'spearman_IG', 'clean_acc']].agg(['mean', 'std', 'count'])
     print(summary_stats.round(4))

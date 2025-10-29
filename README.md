@@ -50,29 +50,17 @@ robust-eeg-models/
 │
 ├── training/
 │   ├── train_standard.ipynb         # Full pipeline notebook
-│   ├── train_script.py              # Modular training functions
 │   └── figures/                     # Training & analysis visualizations
 │
 ├── models/
 │   ├── __init__.py
 │   ├── eeg_mamba_fft.py            # EEGMamba architecture (FFT-based)
 │   ├── eeg_mamba_moe.py            # EEGMamba variant
-│   └── [architectures for EEGNet, DeepConvNet, CTNet]
+│   └── model_note.txt
 │
 ├── attack/
-│   ├── bciadversarialattack.py     # Core attack implementations (FGSM, PGD, DeepFool)
-│   ├── attack_explainers.py         # Explanation-based attack metrics
-│   └── attack_metrics.py            # Robustness metrics & statistics
-│
-├── evaluation/
-│   ├── classification_metrics.py    # Accuracy, F1, confusion matrices
-│   ├── interpretability_metrics.py  # Explanation stability (Spearman, ROI analysis)
-│   └── correlation_analysis.py      # Cross-metric correlations
-│
-├── explainability/
-│   ├── lrp.py                       # Layer-wise Relevance Propagation
-│   ├── saliency.py                  # Saliency maps
-│   └── shap_explainer.py            # SHAP explanations
+│   ├── attack_explainers.py         
+│   └── attack_metrics.py            
 │
 ├── analysis/
 │   ├── clean_data.py                # Data cleaning & preprocessing

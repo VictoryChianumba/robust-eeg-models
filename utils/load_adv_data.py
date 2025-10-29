@@ -1,6 +1,9 @@
-from load_subject import load_subject_data_cached
+from utils.load_subject import load_subject_data_cached
 import numpy as np
 import torch
+
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+
 
 def load_adv_test_data(subject_id):
 

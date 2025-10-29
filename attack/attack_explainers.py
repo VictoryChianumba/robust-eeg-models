@@ -10,17 +10,12 @@ class AttackExplainers:
     def __init__(self, ATTR_MAX_N, N_STEPS_IG, ig, muV_grid,
                  model, X, y, train_min_t, train_max_t,
                  prenorm_std_np, median_std_pre, CH_NAMES=None):
-        """
-        Everything that used to be global is now injected once
-        so that the class is fully self-contained.
-        """
+
         self.ATTR_MAX_N = ATTR_MAX_N
         self.N_STEPS_IG = N_STEPS_IG
         self.muV_grid = muV_grid
         self.ig = ig
         self.CH_NAMES = CH_NAMES
-
-        # ---- previously globals ----
         self.model = model
         self.X = X
         self.y = y
@@ -32,14 +27,18 @@ class AttackExplainers:
 
     @staticmethod
     def per_channel_clamp(x, vmin, vmax):
+        device = x.device
+        vmin = vmin.to(device)
+        vmax = vmax.to(device)
         return torch.max(torch.min(x, vmax), vmin)
 
     @staticmethod
     def smooth_delta_gauss(delta_t: torch.Tensor, sigma_t: float) -> torch.Tensor:
         if sigma_t is None or sigma_t <= 0:
             return delta_t
-        device = delta_t.device
         radius = int(4 * sigma_t + 0.5)
+
+        device = delta_t.device
         x = torch.arange(-radius, radius + 1, dtype=delta_t.dtype, device=device)
         kernel = torch.exp(-0.5 * (x / sigma_t).pow(2))
         kernel /= kernel.sum()
@@ -141,6 +140,8 @@ class AttackExplainers:
                     pa = self.model(xa).argmax(1)
                 preds_adv.append(pa.cpu())
 
+                xa = xa.to(Xi.device)
+                
                 d = (xa - Xi).flatten(1)
                 l2v = d.norm(p=2, dim=1).detach().cpu().numpy()
                 linfv = (xa - Xi).abs().flatten(1).max(dim=1).values.detach().cpu().numpy()
@@ -246,6 +247,7 @@ class AttackExplainers:
                 pa = self.model(xa).argmax(1)
             preds_adv.append(pa.cpu())
 
+            xa = xa.to(Xi.device)
             d = (xa - Xi).flatten(1)
             l2v = d.norm(p=2, dim=1).detach().cpu().numpy()
             l2_all.extend(l2v)

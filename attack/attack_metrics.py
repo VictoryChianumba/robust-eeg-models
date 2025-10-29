@@ -1,4 +1,3 @@
-# ========= Cell 1: Metrics & ROI helpers =========
 import numpy as np
 import torch
 from scipy.stats import spearmanr

@@ -8,20 +8,11 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def create_visualizations(df_analysis):
-    """
-    Create comprehensive visualizations for interpretability-robustness study
-    """
-
-    # Set style
     plt.style.use('seaborn-v0_8')
     sns.set_palette("husl")
 
-    # Create figure with subplots
     fig = plt.figure(figsize=(20, 16))
 
-    # ================================================================
-    # 1. Main Result: ASR vs Spearman_IG by Architecture
-    # ================================================================
     ax1 = plt.subplot(3, 3, 1)
 
     # Architecture colors
@@ -47,9 +38,6 @@ def create_visualizations(df_analysis):
     plt.legend()
     plt.grid(True, alpha=0.3)
 
-    # ================================================================
-    # 2. Attack-Type Specific Correlations
-    # ================================================================
     ax2 = plt.subplot(3, 3, 2)
 
     # Calculate correlations by attack type
@@ -87,9 +75,7 @@ def create_visualizations(df_analysis):
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    # ================================================================
-    # 3. ASR Distribution by Architecture and Model
-    # ================================================================
+
     ax3 = plt.subplot(3, 3, 3)
 
     sns.boxplot(data=df_analysis, x='architecture_type', y='ASR', hue='model_name', ax=ax3)
@@ -97,9 +83,7 @@ def create_visualizations(df_analysis):
     plt.ylabel('Attack Success Rate')
     plt.xlabel('Architecture Type')
 
-    # ================================================================
     # 4. Perturbation Budget Effects
-    # ================================================================
     ax4 = plt.subplot(3, 3, 4)
 
     # Filter data with budget information
@@ -120,9 +104,7 @@ def create_visualizations(df_analysis):
     plt.legend()
     plt.grid(True, alpha=0.3)
 
-    # ================================================================
     # 5. Interpretability Stability by Budget
-    # ================================================================
     ax5 = plt.subplot(3, 3, 5)
 
     for arch in ['CNN', 'StateSpace']:
@@ -139,9 +121,7 @@ def create_visualizations(df_analysis):
     plt.legend()
     plt.grid(True, alpha=0.3)
 
-    # ================================================================
     # 6. Model-Specific Performance
-    # ================================================================
     ax6 = plt.subplot(3, 3, 6)
 
     # Clean accuracy vs ASR by model
@@ -165,9 +145,7 @@ def create_visualizations(df_analysis):
     plt.legend()
     plt.grid(True, alpha=0.3)
 
-    # ================================================================
     # 7. Correlation Matrix Heatmap
-    # ================================================================
     ax7 = plt.subplot(3, 3, 7)
 
     # Create correlation matrix for key variables
@@ -178,9 +156,7 @@ def create_visualizations(df_analysis):
                 square=True, ax=ax7, cbar_kws={'shrink': 0.8})
     plt.title('Variable Correlation Matrix')
 
-    # ================================================================
     # 8. Effect Size Visualization
-    # ================================================================
     ax8 = plt.subplot(3, 3, 8)
 
     # Cohen's d for different comparisons
@@ -227,9 +203,7 @@ def create_visualizations(df_analysis):
     plt.axhline(y=0.8, color='red', linestyle='--', alpha=0.5, label='Large (0.8)')
     plt.legend(fontsize=8)
 
-    # ================================================================
     # 9. Residual Analysis
-    # ================================================================
     ax9 = plt.subplot(3, 3, 9)
 
     # Overall regression residuals
@@ -247,10 +221,7 @@ def create_visualizations(df_analysis):
     plt.tight_layout()
     plt.show()
 
-    # ================================================================
     # Additional Statistical Summary Figure
-    # ================================================================
-
     # Create a summary statistics table visualization
     fig2, ax_table = plt.subplots(figsize=(12, 8))
     ax_table.axis('tight')

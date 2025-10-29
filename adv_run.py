@@ -4,9 +4,8 @@ from braindecode.models import EEGNetv4, Deep4Net, CTNet
 from braindecode.models import CTNet
 print("CTNet is available")
 
-from utils import load_subject as ls
+from utils.load_adv_data import load_adv_test_data
 from repr import repr_helpers as rp
-from utils.train_helpers import train_single_run, create_baseline_table
 from models.eeg_mamba_fft import EEGMamba
 from attack.attack_explainers import AttackExplainers
 
@@ -39,7 +38,7 @@ device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is
 
 muV_grid = [0.25, 0.5, 1.0, 2.0]  
     
-data = ls.load_adv_test_data(SUBJECT_ID)
+data = load_adv_test_data(SUBJECT_ID)
 if isinstance(data, (list, tuple)) and len(data) >= 8:
     X, y, train_min_t, train_max_t, train_std_np, CH_NAMES, train_mean_np, prenorm_std_np = data[:8]
 else:
@@ -66,9 +65,19 @@ IG_INT_BS  = 8
 def run_for_model_seed(model_name: str, seed: int):
 
     rp.set_all_seeds(seed)
-    
+
+    # build & load
+    m = MODEL_BUILDERS[model_name]().to(device)
+    ckpt_path = CKPTS[model_name][seed]
+    ckpt = torch.load(ckpt_path, map_location=device)
+    state_dict = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
+    if any(k.startswith("module.") for k in state_dict.keys()):
+        state_dict = {k.replace("module.", "", 1): v for k, v in state_dict.items()}
+    m.load_state_dict(state_dict)
+    m.eval()
+    model = m
     ig = CA.IntegratedGradients(model)
-    
+
     explainers = AttackExplainers(
         ATTR_MAX_N=ATTR_MAX_N,
         N_STEPS_IG=N_STEPS_IG,
@@ -83,18 +92,6 @@ def run_for_model_seed(model_name: str, seed: int):
         median_std_pre=median_std_pre,
         CH_NAMES=None
     )
-
-    # build & load
-    m = MODEL_BUILDERS[model_name]().to(device)
-    ckpt_path = CKPTS[model_name][seed]
-    ckpt = torch.load(ckpt_path, map_location=device)
-    state_dict = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
-    if any(k.startswith("module.") for k in state_dict.keys()):
-        state_dict = {k.replace("module.", "", 1): v for k, v in state_dict.items()}
-    m.load_state_dict(state_dict)
-    m.eval()
-    model = m
-
 
     # fixed clean subset for attributions
     IDX_CAP = slice(0, min(ATTR_MAX_N, X.size(0)))
@@ -129,7 +126,7 @@ n_channels = int(X.shape[1])
 n_times    = int(X.shape[2])
 n_classes  = int(y.max().item() + 1)
 print(f"Data shape: {X.shape} | n_ch={n_channels}, n_times={n_times}, n_classes={n_classes}")
-print(f"Median PRENORM std (μV): {run_for_model_seed.median_std_pre:.6f} | μV grid: {muV_grid}")
+print(f"Median PRENORM std (μV): {median_std_pre:.6f} | μV grid: {muV_grid}")
 
 all_rows = []
 for model_name in MODEL_BUILDERS.keys():
