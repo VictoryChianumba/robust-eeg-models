@@ -46,6 +46,7 @@ jupyter notebook training/train_standard.ipynb
 robust-eeg-models/
 ├── main.py                          # Baseline model training & evaluation
 ├── adv_run.py                       # Adversarial attack pipeline
+├── analysis.py                      # Analysis pipeline
 ├── requirements.txt                 # Python dependencies
 │
 ├── training/
@@ -100,12 +101,6 @@ robust-eeg-models/
 ### Perturbation Budgets
 Physiologically-motivated μV-based constraints: `[0.25, 0.5, 1.0, 2.0]`
 
-### Explanation Methods
-- Layer-wise Relevance Propagation (LRP)
-- Saliency maps
-- SHAP values
-- Integrated Gradients (IG) with ROI analysis
-
 ### Key Metrics
 - **Adversarial Success Rate (ASR)**
 - **Explanation Stability (Spearman correlation across perturbations)**
@@ -114,22 +109,25 @@ Physiologically-motivated μV-based constraints: `[0.25, 0.5, 1.0, 2.0]`
 
 ## Main Results
 
-[INSERT KEY FINDINGS TABLE/SUMMARY]
-
 ### Explanation Robustness
-- [Spearman correlation results across attacks]
-- [Explanation fool rate by model & attack]
-- [Disconnect between classification & explanation robustness]
+- Spearman correlation results across attacks
+- Explanation fool rate by model & attack
+- Disconnect between classification & explanation robustness
 
 ### Attack Effectiveness
-- [ASR by attack type]
-- [Architecture differences in robustness]
-- [Effect size comparisons]
+- ASR by attack type
+- Architecture differences in robustness
+- Effect size comparisons
 
 ## Data & Reproducibility
 
-**Dataset:** [PLACEHOLDER: describe EEG dataset, number of subjects, sessions, etc.]
+**Dataset:** 
+```
+We evaluated on the BCI Competition IV Dataset 2a [1].
 
+[1] Tangermann, M., et al. (2012). Review of the BCI competition IV. 
+Frontiers in Neuroscience, 6, 55.
+```
 **Subjects:** 4 subjects (selected based on data quality)
 
 **Seed Strategy:** Results aggregated across multiple random seeds (see `attack/attack_metrics.py` for statistical controls)
@@ -143,22 +141,18 @@ Physiologically-motivated μV-based constraints: `[0.25, 0.5, 1.0, 2.0]`
 ## Usage Examples
 
 ### Train baseline models
-```python
-from training.train_script import train_model
-model = train_model(architecture='eegnet', subject=1)
+```
+python main.py
 ```
 
 ### Run adversarial attacks
-```python
-from attack.bciadversarialattack import FGSMAttack
-attacker = FGSMAttack(model, epsilon=0.5)
-x_adv = attacker.attack(x)
+```
+python adv_run.py
 ```
 
-### Analyze explanation stability
-```python
-from evaluation.interpretability_metrics import spearman_correlation
-correlation = spearman_correlation(explanations_clean, explanations_adv)
+### Run analysis
+```
+python analysis.py
 ```
 
 ## Installation & Requirements
@@ -171,7 +165,7 @@ pip install -r requirements.txt
 Key dependencies:
 - PyTorch
 - NumPy, SciPy, Scikit-learn
-- [ADD OTHERS FROM requirements.txt]
+- braindecode
 
 ## Makefile Commands
 ```bash
@@ -190,7 +184,7 @@ make clean       # Remove virtual environment
 
 ## Contact
 
-[PLACEHOLDER: email or GitHub issues]
+[chianumbav@icloud.com or GitHub issues]
 
 ---
 
