@@ -9,7 +9,7 @@ cache/
 
 data/raw/
 data/processed/
-results/
+results_int/
 
 *.log
 *.out
