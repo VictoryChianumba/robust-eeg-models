@@ -1,31 +1,39 @@
 # When Interpretability Fails: Explanation Blindspots in Adversarial EEG Attacks
 
-Adversarial attacks can cause EEG classifiers to fail while their Integrated Gradients explanations remain nearly unchanged — a silent failure mode for interpretability-based monitoring.
+Adversarial perturbations can degrade EEG classifier performance while leaving Integrated Gradients explanations nearly unchanged — creating a **silent failure mode** for interpretability-based monitoring.
 
 ---
 
 ## Problem
 
-Interpretability methods are proposed as safety monitors for neural networks. This assumes: if the model fails, the explanation changes.
+Interpretability methods are often proposed as safety monitors for neural networks.
 
-We test this assumption in EEG motor imagery classification. If an attack can degrade classification while preserving explanations, the monitor is blind to the failure.
+This relies on a key assumption:
+
+> If the model fails, the explanation will change.
+
+We test this assumption in EEG motor imagery classification.
+
+If adversarial attacks can break predictions while preserving explanations, then interpretability cannot reliably detect model failure.
 
 ---
 
 ## Approach
 
-- **Models**: EEGNet, DeepConvNet, CTNet, EEGMamba
-- **Dataset**: BCI Competition IV Dataset 2a (4 subjects, 4-class motor imagery)
-- **Attacks**: FGSM, PGD, DeepFool-L2, and low-pass variants (FGSM-LP, PGD-LP)
-- **Budgets**: 0.25–2.0 μV (physiologically motivated)
-- **Explanation method**: Integrated Gradients
-- **Stability metric**: Spearman correlation between clean and adversarial attributions
+- **Models**: EEGNet, DeepConvNet, CTNet, EEGMamba  
+- **Dataset**: BCI Competition IV Dataset 2a (4 subjects, 4-class motor imagery)  
+- **Attacks**:
+  - Standard: FGSM, PGD, DeepFool-L2  
+  - Structured: FGSM-LP, PGD-LP (low-pass constrained)  
+- **Budgets**: 0.25–2.0 μV (physiologically grounded)  
+- **Explanation method**: Integrated Gradients  
+- **Stability metric**: Spearman correlation (clean vs adversarial attributions)
 
 ---
 
 ## Results
 
-**Baseline accuracy** (chance = 25%):
+### Baseline accuracy (chance = 25%)
 
 | Model       | Accuracy |
 |-------------|----------|
@@ -34,12 +42,18 @@ We test this assumption in EEG motor imagery classification. If an attack can de
 | EEGMamba    | 52.7%    |
 | DeepConvNet | 49.2%    |
 
-**Adversarial results**:
+---
+
+### Adversarial behaviour
 
 | Attack type | Mean ASR | Explanation Stability (ρ) |
 |-------------|----------|--------------------------|
 | Standard    | 93.4%    | 0.872                    |
 | Low-pass    | 63.5%    | **0.998**                |
+
+Low-pass attacks maintain near-perfect explanation stability while still causing substantial misclassification.
+
+---
 
 ![ASR vs Explanation Stability](results/figures/asr_vs_stability.png)
 
@@ -47,17 +61,20 @@ We test this assumption in EEG motor imagery classification. If an attack can de
 
 ![Explanation Attack Success Rate by Architecture](results/figures/architecture_heatmap.png)
 
-Architecture differences were minimal after seed aggregation (Fisher's z comparison: p = 0.71).
+Architecture differences were minimal after seed aggregation (Fisher's z test: p = 0.71).
 
 ---
 
 ## Key Insight
 
-**Attack structure matters more than model architecture.**
+**Interpretability can fail silently.**
 
-Standard attacks break both predictions and explanations — a detectable failure. Low-pass attacks break predictions while leaving explanations intact. This is worse: the model is wrong, but the interpretability monitor reports normal.
+- Standard attacks disrupt both predictions and explanations → detectable failure  
+- Low-pass attacks disrupt predictions while preserving explanations → undetectable failure  
 
-This reveals a structural vulnerability in using IG explanations as runtime monitors. The explanation and the prediction are not coupled in the way safety arguments require.
+This violates a core assumption behind interpretability-based monitoring:
+
+> explanations are not reliably coupled to model correctness under distribution shift.
 
 ---
 
@@ -70,18 +87,14 @@ cd robust-eeg-models
 make venv && make install
 source venv/bin/activate
 
-# Data: download BCI Competition IV Dataset 2a
-# https://www.bbci.de/competition/iv/
-
 # Train baselines
-python main.py
+python scripts/train_baselines.py
 
 # Run adversarial evaluation
-python adv_run.py
+python scripts/run_attacks.py
 
 # Run analysis
-python analysis.py
+python scripts/run_analysis.py
 
 # Blindspot analysis
-python run_blindspot.py
-```
+python scripts/run_blindspot.py
